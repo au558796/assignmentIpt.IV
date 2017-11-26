@@ -5,7 +5,7 @@ date: "October 5, 2017"
 output: html_document
 ---
 ```{r}
-#prelude
+#prelude 
 knitr::opts_chunk$set(echo = TRUE)
 setwd("C:/Users/Dana/Desktop/METHODS III/assignmentIpt.IV")
 library(pacman)
