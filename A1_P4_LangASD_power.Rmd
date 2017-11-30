@@ -4,6 +4,9 @@ author: "Dana Jensen"
 date: "October 5, 2017"
 output: html_document
 ---
+---
+                          "COMPLETE"
+---
 ```{r}
 #prelude 
 knitr::opts_chunk$set(echo = TRUE)
@@ -30,9 +33,6 @@ pd = powerSim(model,fixed("Diagnosis"),nsim=10)
 pd #40%, 12.16 - 73.76
 
 ```
-ANSWER:
-I used the model of child mlu as the dependent variable with visit and diagnosis as predictor variables, with a different slope and intercept for each child (subject as random effect). Running the simulation 10 times on 61 participants with the fixed effect of visit produced a power of 100% with confident intervals of 69.15 and 100. Running a simulation with the same number of simulations and participants for the fixed effect of diagnosis produces a power of 40% with confidence intervals of 12.16 and 73.76. Doing power analyses are useful for a few reasons. First of all, if you are planning on running a study, it's an irreplaceable way to discover how many participants (or stimuli) you will need when running your study to ensure the final results can be meaningful. Second, if you have already conducted a study, a power analysis is useful for uncovering the magnitude of effect size that is possible with the amount of participants you have. Lastly, if wanting to compare two studies, or simply calculate how reliable a study's results are, you can calculate a studies power.
-
 ### Exercise 2
 ```{r}
 
@@ -53,8 +53,6 @@ pd1 #80% (44.39, 97.48)
   ## - Take the model from exercise 1 and replace the effects with the minimum   effect size that you'd accept.
 
 ##Deciding the lowest acceptable effect size
-
-#just looking at range of development as a ballpark
 
 # "Okay honey, I'm changing the effect sizes now!"
 fixef(model)["VISIT"] <- 0.20
