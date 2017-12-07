@@ -12,25 +12,27 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 setwd("C:/Users/Dana/Desktop/METHODS III/assignmentIpt.IV")
 library(pacman)
-p_load(dplyr, ggplot2, lmerTest,simr, MASS)
+p_load(dplyr, ggplot2, lmerTest,simr, MASS, MuMIn)
 train = read.csv("df_train.csv")
 ```
 ### Exercise 1
 ```{r}
-  ## How much power does your study have (if your model estimates are quite     right)?
+  ## How much power does your study have (if your model estimates are quite right)?
   ## - Load your dataset, fit your favorite model, assess power for your main   effects and interactions of interest.
-  ## - Report the power analysis and comment on what you can (or cannot) use    its estimates for.
+  ## - Report the power analysis and comment on what you can (or cannot) use its estimates for.
 
 #Strike a pose. Vogue.
-model = lmer(CHI_MLU ~ VISIT + Diagnosis +(1+VISIT | SUBJ),train, REML = FALSE)
+model = lmer(CHI_MLU ~ VISIT + verbalIQ + MOT_MLU + (1+VISIT | SUBJ),train, REML = FALSE)
 summary(model)
-#question: what units are mlu recorded in? what does an effect of 0.23 mean then?
+r.squaredGLMM(model)
 
 #I've got the power
-pv = powerSim(model,fixed("VISIT"),nsim=10)
+pv = powerSim(model,fixed("VISIT"),nsim=10)#0.19
 pv #100%, 69.15 - 100
-pd = powerSim(model,fixed("Diagnosis"),nsim=10)
-pd #40%, 12.16 - 73.76
+pq = powerSim(model,fixed("verbalIQ"),nsim=10)#0.065
+pq #100%, 69.15 - 100
+pm = powerSim(model,fixed("MOT_MLU"),nsim=10)#0.344
+pm #100%, 69.15, 100
 
 ```
 ### Exercise 2
@@ -38,47 +40,48 @@ pd #40%, 12.16 - 73.76
 
 ## How would you perform a more conservative power analysis?
   ## - Identify and justify a minimum effect size for each of your relevant effects
-
-##Finding the smallest effect size with the model
-
-#visit = 0.23, Diagnosis = 0.29 normally
-fixef(model)["VISIT"] <- 0.0693 # but are we interested in 0.0693??
-pv1 = powerSim(model,fixed("VISIT"),nsim=10)
-pv1 #80% (44.39, 97.48)
-
-fixef(model)["DiagnosisTD"] <- 0.43
-pd1 = powerSim(model,fixed("Diagnosis"),nsim=10)
-pd1 #80% (44.39, 97.48)
-
   ## - Take the model from exercise 1 and replace the effects with the minimum   effect size that you'd accept.
 
 ##Deciding the lowest acceptable effect size
 
-# "Okay honey, I'm changing the effect sizes now!"
-fixef(model)["VISIT"] <- 0.20
-pv2 = powerSim(model,fixed("VISIT"),nsim=10)
-pv2
+# "Honey, I shrunk the effect sizes!"
+fixef(model)["VISIT"] <- 0.07 # but are we interested in 0.07??
+pv1 = powerSim(model,fixed("VISIT"),nsim=1000)
+pv1 
 
-fixef(model)["DiagnosisTD"] <- 0.43
-pd2 = powerSim(model,fixed("Diagnosis"),nsim=10)
-pd2
+fixef(model)["verbalIQ"] <- 0.021
+pq = powerSim(model,fixed("verbalIQ"),nsim=100)
+pq 
+
+fixef(model)["MOT_MLU"] <- 0.15
+pm = powerSim(model,fixed("MOT_MLU"),nsim=1000)
+pm
 
   ## - Assess the power curve by Child.ID, identifying an ideal number of participants to estimate each effect
 
 ##Power curve that shit
-pcv1= powerCurve(model, fixed("VISIT"),along="SUBJ", nsim=10)
+pcv1= powerCurve(model, fixed("VISIT"),along="SUBJ", nsim=100)
 pcv1
+plot(pcv1)
 
-pcv2<-powerCurve(model, fixed("DiagnosisTD"),along="SUBJ", nsim=10)
+pcv2<-powerCurve(model, fixed("verbalIQ"),along="SUBJ", nsim=100)
 pcv2 #gives 0 values
+plot(pcv2)
+
+
+pcv3<-powerCurve(model, fixed("MOY_MLU"),along="SUBJ", nsim=100)
+pcv3 #gives 0 values
+plot(pcv3)
+
 
   ## - Report the power analysis and comment on what you can (or cannot) use    its estimates for.
 ```
 ### Exercise 3
 ```{r}
 
-  ## Assume you have only the resources to collect 30 kids (15 with ASD and 15   TDs). Identify the power for each relevant effect and discuss whether it's    worth to run the study and why.
+  ## Assume you have only the resources to collect 30 kids (15 with ASD and 15   TDs). Identify the power for each relevant effect and discuss whether it's worth to run the study and why.
 
+this_effing_model<-lmer(CHI_MLU~VISIT+Diagnosis+(1+VISIT|SUBJ), data = train, REML = FALSE)
 #Riccardo's function to simulate participants
 createNewData <- function (participants,visits,model){
   # participants is the number of subjects
@@ -115,11 +118,7 @@ createNewData <- function (participants,visits,model){
 }
 
 #let's see what happens
-d<-createNewData(30,6,model)
-
-#just making sure ASD/TD are equal
-length(d$Diagnosis=='0')
-length(d$Diagnosis=='1')
+d<-createNewData(30,6,this_effing_model)
 
 #now let's start
 model1 = lmer(CHI_MLU ~ Visit + Diagnosis +(1+Visit | SUBJ),d, REML = FALSE)
